@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 interface RetroWindowProps {
   id: string;
   title: string;
@@ -36,6 +36,7 @@ export function RetroWindow({
 }: RetroWindowProps) {
   // Mobile check
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const dragControls = useDragControls();
   return (
     <AnimatePresence>
       {isOpen && !isMinimized &&
@@ -52,6 +53,10 @@ export function RetroWindow({
         transition={{
           duration: 0
         }} // Instant transition
+        drag={!isMobile}
+        dragControls={dragControls}
+        dragListener={false}
+        dragMomentum={false}
         className={`absolute ${isMobile ? 'relative w-full mb-4 mx-auto' : width} flex flex-col bg-tos-white border-2 border-tos-black shadow-none`}
         style={{
           zIndex,
@@ -61,7 +66,9 @@ export function RetroWindow({
         onClick={onFocus}>
 
           {/* Title Bar - TempleOS Style: Solid Blue, White Text */}
-          <div className="flex items-center justify-between px-1 py-1 bg-tos-blue text-tos-white cursor-default select-none border-b-2 border-tos-black h-8">
+          <div
+            onPointerDown={(e) => { if (!isMobile) dragControls.start(e); }}
+            className="flex items-center justify-between px-1 py-1 bg-tos-blue text-tos-white cursor-grab active:cursor-grabbing select-none border-b-2 border-tos-black h-8">
             <div className="flex items-center space-x-2 pl-1">
               <button
               onClick={(e) => {
