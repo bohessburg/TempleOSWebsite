@@ -39,13 +39,13 @@ export function RetroWindow({
   const dragControls = useDragControls();
   return (
     <AnimatePresence>
-      {isOpen && !isMinimized &&
+      {isOpen &&
       <motion.div
         initial={{
           opacity: 0
         }}
         animate={{
-          opacity: 1
+          opacity: isMinimized ? 0 : 1
         }}
         exit={{
           opacity: 0
@@ -53,15 +53,16 @@ export function RetroWindow({
         transition={{
           duration: 0
         }} // Instant transition
-        drag={!isMobile}
+        drag={!isMobile && !isMinimized}
         dragControls={dragControls}
         dragListener={false}
         dragMomentum={false}
         className={`absolute ${isMobile ? 'relative w-full mb-4 mx-auto' : width} flex flex-col bg-tos-white border-2 border-tos-black shadow-none`}
         style={{
-          zIndex,
+          zIndex: isMinimized ? -1 : zIndex,
           left: isMobile ? 0 : initialPosition.x,
-          top: isMobile ? 0 : initialPosition.y
+          top: isMobile ? 0 : initialPosition.y,
+          pointerEvents: isMinimized ? 'none' : 'auto',
         }}
         onClick={onFocus}>
 

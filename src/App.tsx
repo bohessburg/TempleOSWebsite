@@ -3,6 +3,7 @@ import { RetroDesktop } from './components/RetroDesktop';
 import { RetroWindow } from './components/RetroWindow';
 import { MenuBar } from './components/MenuBar';
 import { Taskbar } from './components/Taskbar';
+import { ColorText } from './components/ColorText';
 // Types
 type WindowId = 'about' | 'projects' | 'interests' | 'contact' | 'oracle';
 interface WindowState {
@@ -61,66 +62,56 @@ const ORACLE_WORDS = [
 'POINTER',
 'LOOP'];
 
+const randPos = (widthPx: number) => ({
+  x: Math.floor(Math.random() * Math.max(100, window.innerWidth - widthPx - 40)) + 20,
+  y: Math.floor(Math.random() * Math.max(100, window.innerHeight - 400)) + 40,
+});
+
 export function App() {
-  const [windows, setWindows] = useState<WindowState[]>([
+  const [windows, setWindows] = useState<WindowState[]>(() => [
   {
     id: 'about',
     title: 'About.HC',
     isOpen: true,
-    isMinimized: false,
+    isMinimized: true,
     zIndex: 1,
-    initialPos: {
-      x: 40,
-      y: 60
-    },
+    initialPos: randPos(400),
     width: 'w-[400px]'
   },
   {
     id: 'projects',
     title: 'Projects.HC',
     isOpen: true,
-    isMinimized: false,
+    isMinimized: true,
     zIndex: 2,
-    initialPos: {
-      x: 460,
-      y: 80
-    },
+    initialPos: randPos(450),
     width: 'w-[450px]'
   },
   {
     id: 'interests',
     title: 'Interests.HC',
     isOpen: true,
-    isMinimized: false,
+    isMinimized: true,
     zIndex: 3,
-    initialPos: {
-      x: 80,
-      y: 400
-    },
+    initialPos: randPos(320),
     width: 'w-[320px]'
   },
   {
     id: 'contact',
     title: 'Contact.HC',
     isOpen: true,
-    isMinimized: false,
+    isMinimized: true,
     zIndex: 4,
-    initialPos: {
-      x: 500,
-      y: 450
-    },
+    initialPos: randPos(350),
     width: 'w-[350px]'
   },
   {
     id: 'oracle',
     title: 'Oracle.HC',
-    isOpen: false,
-    isMinimized: false,
+    isOpen: true,
+    isMinimized: true,
     zIndex: 5,
-    initialPos: {
-      x: 300,
-      y: 200
-    },
+    initialPos: randPos(300),
     width: 'w-[300px]'
   }]
   );
@@ -180,12 +171,16 @@ export function App() {
     )
     );
   };
-  const handleStartClick = () => {
-    const oracleWindow = windows.find((w) => w.id === 'oracle');
-    if (oracleWindow?.isOpen) {
-      closeWindow('oracle');
+  const restoreWindow = (id: string) => {
+    const wid = id as WindowId;
+    const win = windows.find((w) => w.id === wid);
+    if (!win) return;
+    if (!win.isOpen) {
+      openWindow(wid);
+    } else if (win.isMinimized) {
+      focusWindow(wid);
     } else {
-      openWindow('oracle');
+      toggleMinimize(wid);
     }
   };
   const generateGodWord = () => {
@@ -224,29 +219,21 @@ export function App() {
             </div>
 
             <div className="w-full text-left">
-              <h2 className="text-3xl font-bold text-tos-red mb-2">
-                Alex Developer
+              <h2 className="text-3xl font-bold mb-2">
+                <ColorText>Bo Hessburg</ColorText>
               </h2>
-              <p className="text-tos-black text-xl">Full Stack Engineer</p>
+              <p className="text-xl"><ColorText>Software Developer and Enthusiast</ColorText></p>
             </div>
 
             <div className="w-full bg-tos-white border-2 border-tos-black p-2 text-left text-lg">
-              <p>
-                <span className="text-tos-blue">OS:</span> TempleOS v5.03
-              </p>
-              <p>
-                <span className="text-tos-blue">CPU:</span> 64-bit
-              </p>
-              <p>
-                <span className="text-tos-blue">Res:</span> 640x480 16-color
-              </p>
-              <p>
-                <span className="text-tos-blue">Mem:</span> 128GB
-              </p>
+              <p><ColorText>OS: TempleOS v5.03</ColorText></p>
+              <p><ColorText>CPU: 64-bit</ColorText></p>
+              <p><ColorText>Res: 640x480 16-color</ColorText></p>
+              <p><ColorText>Mem: 128GB</ColorText></p>
             </div>
 
             <p className="text-lg leading-tight text-left">
-              "Building cool stuff. Keeping it simple, fast, and low-level."
+              <ColorText>"Building cool stuff. Keeping it simple, fast, and low-level."</ColorText>
             </p>
           </div>
         </RetroWindow>
@@ -259,8 +246,8 @@ export function App() {
           onFocus={() => focusWindow('projects')}>
 
           <div className="space-y-4">
-            <div className="text-tos-blue mb-2 border-b-2 border-tos-black pb-1">
-              DIR: /Home/Projects
+            <div className="mb-2 border-b-2 border-tos-black pb-1">
+              <ColorText>DIR: /Home/Projects</ColorText>
             </div>
             {[
             {
@@ -288,15 +275,15 @@ export function App() {
               key={i}
               className="flex items-start space-x-2 cursor-pointer hover:bg-tos-blue hover:text-tos-white p-1">
 
-                <span className="text-tos-red font-bold">[FILE]</span>
+                <span className="font-bold"><ColorText>[FILE]</ColorText></span>
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-xl">{project.name}</h3>
+                    <h3 className="font-bold text-xl"><ColorText>{project.name}</ColorText></h3>
                     <span className="text-sm border border-tos-black px-1 bg-tos-white text-tos-black">
                       {project.type}
                     </span>
                   </div>
-                  <p className="text-lg opacity-80">{project.desc}</p>
+                  <p className="text-lg"><ColorText>{project.desc}</ColorText></p>
                 </div>
               </div>
             )}
@@ -311,8 +298,8 @@ export function App() {
           onFocus={() => focusWindow('interests')}>
 
           <div className="space-y-2">
-            <div className="text-tos-blue mb-2 border-b-2 border-tos-black pb-1">
-              cat interests.txt
+            <div className="mb-2 border-b-2 border-tos-black pb-1">
+              <ColorText>cat interests.txt</ColorText>
             </div>
             <ul className="list-none space-y-1">
               {[
@@ -329,8 +316,8 @@ export function App() {
                 key={i}
                 className="flex items-center space-x-2 hover:bg-tos-cyan hover:text-tos-black cursor-pointer px-1">
 
-                  <span className="text-tos-green font-bold">{'>'}</span>
-                  <span className="text-xl">{item}</span>
+                  <span className="font-bold"><ColorText>{'>'}</ColorText></span>
+                  <span className="text-xl"><ColorText>{item}</ColorText></span>
                 </li>
               )}
             </ul>
@@ -349,31 +336,27 @@ export function App() {
               {[
               {
                 label: 'Email',
-                val: 'hello@example.com'
+                val: 'bohessburg96@gmail.com'
               },
               {
                 label: 'GitHub',
-                val: 'github.com/alexdev'
-              },
-              {
-                label: 'Twitter',
-                val: '@alex_dev'
+                val: 'github.com/bohessburg'
               }].
               map((contact, i) =>
               <div
                 key={i}
                 className="flex flex-col p-1 hover:bg-tos-blue hover:text-tos-white cursor-pointer">
 
-                  <span className="text-tos-red font-bold text-sm">
-                    {contact.label}:
+                  <span className="font-bold text-sm">
+                    <ColorText>{contact.label + ':'}</ColorText>
                   </span>
-                  <span className="text-xl">{contact.val}</span>
+                  <span className="text-xl"><ColorText>{contact.val}</ColorText></span>
                 </div>
               )}
             </div>
 
-            <button className="w-full py-2 bg-tos-white border-2 border-tos-black hover:bg-tos-green hover:text-tos-white font-bold text-xl flex items-center justify-center space-x-2 transition-none">
-              <span>[ SEND MESSAGE ]</span>
+            <button className="w-full py-2 bg-tos-white border-2 border-tos-black hover:bg-tos-blue hover:text-tos-white font-bold text-xl flex items-center justify-center space-x-2 transition-none">
+              <span><ColorText>[ SEND MESSAGE ]</ColorText></span>
             </button>
           </div>
         </RetroWindow>
@@ -386,11 +369,11 @@ export function App() {
           onFocus={() => focusWindow('oracle')}>
 
           <div className="flex flex-col items-center justify-center space-y-4 p-4 text-center h-full">
-            <h3 className="text-tos-magenta font-bold text-2xl">
-              ORACLE SAYS:
+            <h3 className="font-bold text-2xl">
+              <ColorText>ORACLE SAYS:</ColorText>
             </h3>
-            <div className="border-2 border-tos-black p-4 w-full bg-tos-yellow text-tos-black text-3xl font-bold animate-pulse">
-              {oracleWord}
+            <div className="border-2 border-tos-black p-4 w-full bg-tos-white text-3xl font-bold">
+              <ColorText>{oracleWord}</ColorText>
             </div>
             <button
               onClick={generateOracleWord}
@@ -404,8 +387,7 @@ export function App() {
 
       <Taskbar
         windows={windows}
-        onRestore={openWindow}
-        onStartClick={handleStartClick} />
+        onRestore={restoreWindow} />
 
     </div>);
 

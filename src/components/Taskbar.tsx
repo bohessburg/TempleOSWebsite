@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 interface TaskbarProps {
   windows: Array<{
     id: string;
@@ -7,18 +7,52 @@ interface TaskbarProps {
     isMinimized: boolean;
   }>;
   onRestore: (id: string) => void;
-  onStartClick: () => void;
 }
-export function Taskbar({ windows, onRestore, onStartClick }: TaskbarProps) {
+export function Taskbar({ windows, onRestore }: TaskbarProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
+
   return (
     <div className="fixed bottom-0 left-0 w-full h-10 bg-tos-white border-t-2 border-tos-black flex items-center px-1 z-50 font-retro text-xl">
-      {/* Start Button */}
-      <button
-        onClick={onStartClick}
-        className="flex items-center px-3 py-1 mr-2 bg-tos-white border-2 border-tos-black hover:bg-tos-blue hover:text-tos-white active:bg-tos-black active:text-tos-white focus:outline-none transition-none">
+      {/* Start Button + Menu */}
+      <div ref={menuRef} className="relative">
+        <button
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className={`flex items-center px-3 py-1 mr-2 border-2 border-tos-black focus:outline-none transition-none ${menuOpen ? 'bg-tos-blue text-tos-white' : 'bg-tos-white text-tos-black hover:bg-tos-blue hover:text-tos-white active:bg-tos-black active:text-tos-white'}`}>
+          <span className="font-bold tracking-wide">[MENU]</span>
+        </button>
 
-        <span className="font-bold tracking-wide">[MENU]</span>
-      </button>
+        {menuOpen &&
+          <div className="absolute bottom-full left-0 mb-1 bg-tos-white border-2 border-tos-black min-w-[200px] z-[100]">
+            {windows.map((w) =>
+              <button
+                key={w.id}
+                onClick={() => {
+                  onRestore(w.id);
+                  setMenuOpen(false);
+                }}
+                className="w-full text-left px-2 py-1 hover:bg-tos-blue hover:text-tos-white flex items-center justify-between transition-none">
+                <span>{w.title}</span>
+                <span className="text-sm">
+                  {!w.isOpen ? '[CLOSED]' : w.isMinimized ? '[MIN]' : '[OPEN]'}
+                </span>
+              </button>
+            )}
+          </div>
+        }
+      </div>
 
       {/* Divider */}
       <div className="w-0.5 h-6 bg-tos-black mx-2" />
