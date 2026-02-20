@@ -72,8 +72,8 @@ export function App() {
   {
     id: 'about',
     title: 'About.HC',
-    isOpen: true,
-    isMinimized: true,
+    isOpen: false,
+    isMinimized: false,
     zIndex: 1,
     initialPos: randPos(400),
     width: 'w-[400px]'
@@ -81,8 +81,8 @@ export function App() {
   {
     id: 'projects',
     title: 'Projects.HC',
-    isOpen: true,
-    isMinimized: true,
+    isOpen: false,
+    isMinimized: false,
     zIndex: 2,
     initialPos: randPos(450),
     width: 'w-[450px]'
@@ -90,8 +90,8 @@ export function App() {
   {
     id: 'interests',
     title: 'Interests.HC',
-    isOpen: true,
-    isMinimized: true,
+    isOpen: false,
+    isMinimized: false,
     zIndex: 3,
     initialPos: randPos(320),
     width: 'w-[320px]'
@@ -99,8 +99,8 @@ export function App() {
   {
     id: 'contact',
     title: 'Contact.HC',
-    isOpen: true,
-    isMinimized: true,
+    isOpen: false,
+    isMinimized: false,
     zIndex: 4,
     initialPos: randPos(350),
     width: 'w-[350px]'
@@ -108,8 +108,8 @@ export function App() {
   {
     id: 'oracle',
     title: 'Oracle.HC',
-    isOpen: true,
-    isMinimized: true,
+    isOpen: false,
+    isMinimized: false,
     zIndex: 5,
     initialPos: randPos(300),
     width: 'w-[300px]'
@@ -196,7 +196,7 @@ export function App() {
     <div className="h-screen w-screen overflow-hidden font-retro text-tos-black select-none bg-tos-white">
       <MenuBar />
 
-      <RetroDesktop>
+      <RetroDesktop windows={windows} onOpenWindow={(id) => openWindow(id as WindowId)}>
         {/* About Me Window */}
         <RetroWindow
           {...windows.find((w) => w.id === 'about')!}
