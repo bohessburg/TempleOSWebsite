@@ -6,7 +6,7 @@ const ICON_GLYPHS: Record<string, string> = {
   projects: '[DIR]',
   interests: '[TXT]',
   contact: '[MSG]',
-  oracle: '[???]',
+  chatbot: '[BOT]',
 };
 
 interface RetroDesktopProps {

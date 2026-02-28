@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { RetroDesktop } from './components/RetroDesktop';
 import { RetroWindow } from './components/RetroWindow';
 import { MenuBar } from './components/MenuBar';
 import { Taskbar } from './components/Taskbar';
 import { ColorText } from './components/ColorText';
 // Types
-type WindowId = 'about' | 'projects' | 'interests' | 'contact' | 'oracle';
+type WindowId = 'about' | 'projects' | 'interests' | 'contact' | 'chatbot';
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 interface WindowState {
   id: WindowId;
   title: string;
@@ -18,50 +23,6 @@ interface WindowState {
   };
   width: string;
 }
-const GOD_WORDS = [
-'CREATE',
-'LIGHT',
-'CODE',
-'HOLY',
-'TEMPLE',
-'SYSTEM',
-'COMPILER',
-'DIVINE',
-'SPIRIT',
-'TRUTH',
-'WITNESS',
-'OFFERING',
-'COMMAND',
-'SHEPHERD',
-'FLOCK',
-'HYMN',
-'PSALM',
-'VISION',
-'PROPHET',
-'KING'];
-
-const ORACLE_WORDS = [
-'CREATE',
-'LIGHT',
-'CODE',
-'KERNEL',
-'SYSTEM',
-'COMPILER',
-'MEMORY',
-'PROCESS',
-'TRUTH',
-'BINARY',
-'STACK',
-'COMMAND',
-'THREAD',
-'SIGNAL',
-'RENDER',
-'PARSE',
-'EXECUTE',
-'VISION',
-'POINTER',
-'LOOP'];
-
 const randPos = (widthPx: number) => ({
   x: Math.floor(Math.random() * Math.max(100, window.innerWidth - widthPx - 40)) + 20,
   y: Math.floor(Math.random() * Math.max(100, window.innerHeight - 400)) + 40,
@@ -106,18 +67,22 @@ export function App() {
     width: 'w-[350px]'
   },
   {
-    id: 'oracle',
-    title: 'Oracle.HC',
+    id: 'chatbot',
+    title: 'Chat.HC',
     isOpen: false,
     isMinimized: false,
     zIndex: 5,
-    initialPos: randPos(300),
-    width: 'w-[300px]'
+    initialPos: randPos(380),
+    width: 'w-[380px]'
   }]
   );
   const [topZIndex, setTopZIndex] = useState(10);
-  const [godWord, setGodWord] = useState('PRESS F7 FOR WORD');
-  const [oracleWord, setOracleWord] = useState('PRESS F7 FOR WORD');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', content: 'Welcome. Type a message to begin.' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
   const focusWindow = (id: WindowId) => {
     setTopZIndex((prev) => prev + 1);
     setWindows((prev) =>
@@ -183,14 +148,36 @@ export function App() {
       toggleMinimize(wid);
     }
   };
-  const generateGodWord = () => {
-    const randomWord = GOD_WORDS[Math.floor(Math.random() * GOD_WORDS.length)];
-    setGodWord(randomWord);
-  };
-  const generateOracleWord = () => {
-    const randomWord =
-    ORACLE_WORDS[Math.floor(Math.random() * ORACLE_WORDS.length)];
-    setOracleWord(randomWord);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const sendMessage = async () => {
+    const text = chatInput.trim();
+    if (!text || chatLoading) return;
+    const userMsg: ChatMessage = { role: 'user', content: text };
+    setChatMessages((prev) => [...prev, userMsg]);
+    setChatInput('');
+    setChatLoading(true);
+
+    // TODO: Replace with Azure OpenAI API call
+    // Example:
+    // const res = await fetch('https://<your-resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=2024-02-01', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json', 'api-key': '<your-key>' },
+    //   body: JSON.stringify({ messages: [...chatMessages, userMsg] })
+    // });
+    // const data = await res.json();
+    // const reply = data.choices[0].message.content;
+
+    // Placeholder echo response
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `Echo: ${text}` }
+      ]);
+      setChatLoading(false);
+    }, 500);
   };
   return (
     <div className="h-screen w-screen overflow-hidden font-retro text-tos-black select-none bg-tos-white">
@@ -220,7 +207,7 @@ export function App() {
 
             <div className="w-full text-left">
               <h2 className="text-3xl font-bold mb-2">
-                <ColorText>Bo Hessburg</ColorText>
+                <ColorText>{import.meta.env.VITE_OWNER_NAME}</ColorText>
               </h2>
               <p className="text-xl"><ColorText>Software Developer and Enthusiast</ColorText></p>
             </div>
@@ -336,11 +323,11 @@ export function App() {
               {[
               {
                 label: 'Email',
-                val: 'bohessburg96@gmail.com'
+                val: import.meta.env.VITE_OWNER_EMAIL
               },
               {
                 label: 'GitHub',
-                val: 'github.com/bohessburg'
+                val: import.meta.env.VITE_GITHUB_URL
               }].
               map((contact, i) =>
               <div
@@ -361,26 +348,55 @@ export function App() {
           </div>
         </RetroWindow>
 
-        {/* Oracle Window */}
+        {/* Chatbot Window */}
         <RetroWindow
-          {...windows.find((w) => w.id === 'oracle')!}
-          onClose={() => closeWindow('oracle')}
-          onMinimize={() => toggleMinimize('oracle')}
-          onFocus={() => focusWindow('oracle')}>
+          {...windows.find((w) => w.id === 'chatbot')!}
+          onClose={() => closeWindow('chatbot')}
+          onMinimize={() => toggleMinimize('chatbot')}
+          onFocus={() => focusWindow('chatbot')}>
 
-          <div className="flex flex-col items-center justify-center space-y-4 p-4 text-center h-full">
-            <h3 className="font-bold text-2xl">
-              <ColorText>ORACLE SAYS:</ColorText>
-            </h3>
-            <div className="border-2 border-tos-black p-4 w-full bg-tos-white text-3xl font-bold">
-              <ColorText>{oracleWord}</ColorText>
+          <div className="flex flex-col h-[350px]">
+            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[80%] px-2 py-1 border-2 border-tos-black text-lg ${
+                    msg.role === 'user'
+                      ? 'bg-tos-cyan text-tos-black'
+                      : 'bg-tos-blue text-tos-white'
+                  }`}>
+                    <span className="font-bold text-sm">
+                      {msg.role === 'user' ? 'YOU>' : 'BOT>'}
+                    </span>
+                    <br />
+                    <ColorText>{msg.content}</ColorText>
+                  </div>
+                </div>
+              ))}
+              {chatLoading && (
+                <div className="flex justify-start">
+                  <div className="px-2 py-1 border-2 border-tos-black bg-tos-blue text-tos-white text-lg">
+                    <ColorText>...</ColorText>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
             </div>
-            <button
-              onClick={generateOracleWord}
-              className="px-4 py-2 border-2 border-tos-black bg-tos-cyan text-tos-black hover:bg-tos-blue hover:text-tos-white font-bold text-xl">
-
-              [ F7: RANDOM WORD ]
-            </button>
+            <div className="border-t-2 border-tos-black p-2 flex space-x-2">
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Type here..."
+                className="flex-1 border-2 border-tos-black px-2 py-1 bg-tos-white text-tos-black font-retro text-lg outline-none focus:border-tos-blue"
+              />
+              <button
+                onClick={sendMessage}
+                disabled={chatLoading}
+                className="px-3 py-1 border-2 border-tos-black bg-tos-cyan text-tos-black hover:bg-tos-blue hover:text-tos-white font-bold text-lg disabled:opacity-50">
+                [SEND]
+              </button>
+            </div>
           </div>
         </RetroWindow>
       </RetroDesktop>
