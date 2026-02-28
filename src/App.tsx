@@ -156,28 +156,31 @@ export function App() {
     const text = chatInput.trim();
     if (!text || chatLoading) return;
     const userMsg: ChatMessage = { role: 'user', content: text };
-    setChatMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...chatMessages, userMsg];
+    setChatMessages(updatedMessages);
     setChatInput('');
     setChatLoading(true);
 
-    // TODO: Replace with Azure OpenAI API call
-    // Example:
-    // const res = await fetch('https://<your-resource>.openai.azure.com/openai/deployments/<deployment>/chat/completions?api-version=2024-02-01', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json', 'api-key': '<your-key>' },
-    //   body: JSON.stringify({ messages: [...chatMessages, userMsg] })
-    // });
-    // const data = await res.json();
-    // const reply = data.choices[0].message.content;
-
-    // Placeholder echo response
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: updatedMessages }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
       setChatMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: `Echo: ${text}` }
+        { role: 'assistant', content: data.reply }
       ]);
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Error: could not reach server.' }
+      ]);
+    } finally {
       setChatLoading(false);
-    }, 500);
+    }
   };
   return (
     <div className="h-screen w-screen overflow-hidden font-retro text-tos-black select-none bg-tos-white">

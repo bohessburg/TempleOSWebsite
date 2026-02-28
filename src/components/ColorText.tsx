@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 
 const TOS_COLORS = [
   '#000000', // black
-  '#0000AA', // blue
   '#00AA00', // green
   '#00AAAA', // cyan
   '#AA0000', // red
