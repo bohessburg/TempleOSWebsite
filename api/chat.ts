@@ -4,8 +4,8 @@ import { AzureOpenAI } from 'openai';
 const client = new AzureOpenAI({
   apiKey: process.env.AZURE_OPENAI_KEY,
   endpoint: process.env.AZURE_OPENAI_ENDPOINT,
-  deployment: 'gpt-4.1-nano',
-  apiVersion: '2024-04-01-preview',
+  deployment: 'gpt-4.1-mini',
+  apiVersion: '2025-04-14',
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const completion = await client.chat.completions.create({
-      model: 'gpt-4.1-nano',
+      model: 'gpt-4.1-mini',
       messages,
     });
 
